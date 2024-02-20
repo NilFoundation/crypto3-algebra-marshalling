@@ -600,7 +600,7 @@ namespace nil {
                         g2_field_value_type y2_mod = x_mod.pow(3) + group_type::params_type::b;
                         BOOST_ASSERT(y2_mod.is_square());
                         g2_field_value_type y_mod = y2_mod.sqrt();
-                        bool Y_bit = detail::sign_gf_p<g2_field_type>(y_mod);
+                        bool Y_bit = detail::sign_gf_p<group_type>(y_mod);
                         if (Y_bit == bool(S_bit)) {
                             g2_value_type result(x_mod, y_mod, g2_field_value_type::one());
                             BOOST_ASSERT(result.is_well_formed());
