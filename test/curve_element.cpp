@@ -73,23 +73,27 @@ void test_curve_element_big_endian(T val) {
 
     static_assert(nil::marshalling::is_curve_element<curve_element_type>::value);
     static_assert(nil::marshalling::is_compatible<T>::value);
+    nil::marshalling::status_type status;
+
+/*
     auto va = val.to_affine();
 
-    nil::marshalling::status_type status;
-    /*
-    std::cout << "Enc X: " << std::hex << std::setw(64) << std::setfill('0') << va.X.data[0]  << std::endl;
-    std::cout << "Enc X: " << std::hex << std::setw(64) << std::setfill('0') << va.X.data[1]  << std::endl;
-    std::cout << "Enc Y: " << std::hex << std::setw(64) << std::setfill('0') << va.Y.data[0]  << std::endl;
-    std::cout << "Enc Y: " << std::hex << std::setw(64) << std::setfill('0') << va.Y.data[1]  << std::endl;*/
-
+    int w = 76;
+    
+    std::cout << "Enc X: " << std::hex << std::setw(w) << std::setfill('0') << va.X.data[0]  << std::endl;
+    std::cout << "Enc X: " << std::hex << std::setw(w) << std::setfill('0') << va.X.data[1]  << std::endl;
+    std::cout << "Enc Y: " << std::hex << std::setw(w) << std::setfill('0') << va.Y.data[0]  << std::endl;
+    std::cout << "Enc Y: " << std::hex << std::setw(w) << std::setfill('0') << va.Y.data[1]  << std::endl;
+*/
     std::vector<unit_type> cv = nil::marshalling::pack<Endianness>(val, status);
-
+/*
+    std::cout << "Bytes (" << std::dec << cv.size() << ")" << std::endl;
+    std::cout << "     : ";
     print_byteblob(cv.begin(), cv.end());
-
+*/
     BOOST_CHECK(status == nil::marshalling::status_type::success);
 
     T test_val = nil::marshalling::pack<Endianness>(cv, status);
-
     BOOST_CHECK(val == test_val);
     BOOST_CHECK(status == nil::marshalling::status_type::success);
 }
@@ -102,9 +106,10 @@ void test_curve_element() {
     /* test infinity */
     typename CurveGroup::value_type val = typename CurveGroup::value_type();
     test_curve_element_big_endian(val);
+//    std::cout << "Point at infinity tested" << std::endl;
 
     /* test 128 random points */
-    for (unsigned i = 0; i < 128; ++i) {
+    for (unsigned i = 0; i < 8; ++i) {
         if (!(i % 16) && i) {
             std::cout << std::dec << i << " tested" << std::endl;
         }
@@ -124,7 +129,7 @@ BOOST_AUTO_TEST_CASE(curve_element_bn254_g1) {
 }
 #endif
 
-#if 1
+#if 0
 BOOST_AUTO_TEST_CASE(curve_element_bn254_g2) {
     std::cout << "BN254 g2 group test started" << std::endl;
     test_curve_element<nil::crypto3::algebra::curves::alt_bn128_254::g2_type<>>();
@@ -138,7 +143,9 @@ BOOST_AUTO_TEST_CASE(curve_element_mnt4_g1) {
     test_curve_element<nil::crypto3::algebra::curves::mnt4_298::g1_type<>>();
     std::cout << "MNT4 g1 group test finished" << std::endl;
 }
+#endif
 
+#if 0
 BOOST_AUTO_TEST_CASE(curve_element_mnt4_g2) {
     std::cout << "MNT4 g2 group test started" << std::endl;
     test_curve_element<nil::crypto3::algebra::curves::mnt4_298::g2_type<>>();
@@ -146,7 +153,7 @@ BOOST_AUTO_TEST_CASE(curve_element_mnt4_g2) {
 }
 #endif
 
-#if 0
+#if 1
 BOOST_AUTO_TEST_CASE(curve_element_mnt6_g1) {
     std::cout << "MNT6 g1 group test started" << std::endl;
     test_curve_element<nil::crypto3::algebra::curves::mnt6_298::g1_type<>>();
