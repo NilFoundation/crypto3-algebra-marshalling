@@ -25,12 +25,14 @@
 
 #define BOOST_TEST_MODULE crypto3_marshalling_curve_element_test
 
-#include <boost/test/unit_test.hpp>
+#include <boost/test/included/unit_test.hpp>
+
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <iostream>
 #include <iomanip>
+#include <nil/crypto3/multiprecision/number.hpp>
 
 #include <nil/marshalling/status_type.hpp>
 #include <nil/marshalling/field_type.hpp>
@@ -42,6 +44,11 @@
 #include <nil/crypto3/algebra/curves/detail/forms/montgomery/element_g1_affine.hpp>
 #include <nil/crypto3/algebra/curves/jubjub.hpp>
 
+#include <nil/crypto3/algebra/curves/mnt4.hpp>
+#include <nil/crypto3/algebra/curves/mnt6.hpp>
+
+#include <nil/crypto3/algebra/curves/alt_bn128.hpp>
+
 #include <nil/marshalling/algorithms/pack.hpp>
 
 #include <nil/crypto3/marshalling/algebra/types/curve_element.hpp>
@@ -49,8 +56,9 @@
 template<typename TIter>
 void print_byteblob(TIter iter_begin, TIter iter_end) {
     for (TIter it = iter_begin; it != iter_end; it++) {
-        std::cout << std::hex << int(*it) << std::endl;
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << int(*it);
     }
+    std::cout << std::endl;
 }
 
 template<typename T>
@@ -65,9 +73,18 @@ void test_curve_element_big_endian(T val) {
 
     static_assert(nil::marshalling::is_curve_element<curve_element_type>::value);
     static_assert(nil::marshalling::is_compatible<T>::value);
+    auto va = val.to_affine();
 
     nil::marshalling::status_type status;
+    /*
+    std::cout << "Enc X: " << std::hex << std::setw(64) << std::setfill('0') << va.X.data[0]  << std::endl;
+    std::cout << "Enc X: " << std::hex << std::setw(64) << std::setfill('0') << va.X.data[1]  << std::endl;
+    std::cout << "Enc Y: " << std::hex << std::setw(64) << std::setfill('0') << va.Y.data[0]  << std::endl;
+    std::cout << "Enc Y: " << std::hex << std::setw(64) << std::setfill('0') << va.Y.data[1]  << std::endl;*/
+
     std::vector<unit_type> cv = nil::marshalling::pack<Endianness>(val, status);
+
+    print_byteblob(cv.begin(), cv.end());
 
     BOOST_CHECK(status == nil::marshalling::status_type::success);
 
@@ -81,11 +98,17 @@ template<typename CurveGroup>
 void test_curve_element() {
     std::cout << std::hex;
     std::cerr << std::hex;
+
+    /* test infinity */
+    typename CurveGroup::value_type val = typename CurveGroup::value_type();
+    test_curve_element_big_endian(val);
+
+    /* test 128 random points */
     for (unsigned i = 0; i < 128; ++i) {
         if (!(i % 16) && i) {
             std::cout << std::dec << i << " tested" << std::endl;
         }
-        typename CurveGroup::value_type val = nil::crypto3::algebra::random_element<CurveGroup>();
+        val = nil::crypto3::algebra::random_element<CurveGroup>();
         test_curve_element_big_endian(val);
         // test_curve_element_little_endian(val);
     }
@@ -93,17 +116,68 @@ void test_curve_element() {
 
 BOOST_AUTO_TEST_SUITE(curve_element_test_suite)
 
+#if 0
+BOOST_AUTO_TEST_CASE(curve_element_bn254_g1) {
+    std::cout << "BN254 g1 group test started" << std::endl;
+    test_curve_element<nil::crypto3::algebra::curves::alt_bn128_254::g1_type<>>();
+    std::cout << "BN254 g1 group test finished" << std::endl;
+}
+#endif
+
+#if 1
+BOOST_AUTO_TEST_CASE(curve_element_bn254_g2) {
+    std::cout << "BN254 g2 group test started" << std::endl;
+    test_curve_element<nil::crypto3::algebra::curves::alt_bn128_254::g2_type<>>();
+    std::cout << "BN254 g2 group test finished" << std::endl;
+}
+#endif
+
+#if 0
+BOOST_AUTO_TEST_CASE(curve_element_mnt4_g1) {
+    std::cout << "MNT4 g1 group test started" << std::endl;
+    test_curve_element<nil::crypto3::algebra::curves::mnt4_298::g1_type<>>();
+    std::cout << "MNT4 g1 group test finished" << std::endl;
+}
+
+BOOST_AUTO_TEST_CASE(curve_element_mnt4_g2) {
+    std::cout << "MNT4 g2 group test started" << std::endl;
+    test_curve_element<nil::crypto3::algebra::curves::mnt4_298::g2_type<>>();
+    std::cout << "MNT4 g2 group test finished" << std::endl;
+}
+#endif
+
+#if 0
+BOOST_AUTO_TEST_CASE(curve_element_mnt6_g1) {
+    std::cout << "MNT6 g1 group test started" << std::endl;
+    test_curve_element<nil::crypto3::algebra::curves::mnt6_298::g1_type<>>();
+    std::cout << "MNT6 g1 group test finished" << std::endl;
+}
+
+BOOST_AUTO_TEST_CASE(curve_element_mnt6_g2) {
+    std::cout << "MNT6 g2 group test started" << std::endl;
+    test_curve_element<nil::crypto3::algebra::curves::mnt6_298::g2_type<>>();
+    std::cout << "MNT6 g2 group test finished" << std::endl;
+}
+#endif
+
+#if 0
+
 BOOST_AUTO_TEST_CASE(curve_element_bls12_381_g1) {
     std::cout << "BLS12-381 g1 group test started" << std::endl;
     test_curve_element<nil::crypto3::algebra::curves::bls12<381>::g1_type<>>();
     std::cout << "BLS12-381 g1 group test finished" << std::endl;
 }
+#endif
+
+#if 0
 
 BOOST_AUTO_TEST_CASE(curve_element_bls12_381_g2) {
     std::cout << "BLS12-381 g2 group test started" << std::endl;
     test_curve_element<nil::crypto3::algebra::curves::bls12<381>::g2_type<>>();
     std::cout << "BLS12-381 g2 group test finished" << std::endl;
 }
+
+#endif
 
 BOOST_AUTO_TEST_CASE(curve_element_jubjub_g1) {
     using curve_type = nil::crypto3::algebra::curves::jubjub;
