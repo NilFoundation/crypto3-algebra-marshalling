@@ -1137,10 +1137,7 @@ namespace nil {
                         g2_field_value_type y2_mod = x_mod.pow(3)
                             + group_type::params_type::a * x_mod
                             + group_type::params_type::b;
-
-                        /* disabled until .is_square for Fp3 is fixed
                         BOOST_ASSERT(y2_mod.is_square());
-                        */
                         g2_field_value_type y_mod = y2_mod.sqrt();
                         bool Y_bit = detail::sign_gf_p<g2_field_type>(y_mod);
                         if (Y_bit == bool(S_bit)) {
